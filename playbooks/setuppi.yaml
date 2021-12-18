@@ -1,0 +1,21 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name:
+      apt:
+        name: ['python3-pip', 'python3-venv', 'docker.io', 'docker-compose']
+        state: latest
+      tags: installation, packages
+
+    - name:
+      pip:
+        name:
+          - docker  
+      tags: latest
+
+    - name: Install Minikube
+      shell:
+        cmd: |
+          curl -Lo ~/minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-arm \
+          && chmod +x ~/minikube && mkdir -p /usr/local/bin/ \
+          && install ~/minikube /usr/local/bin/
