@@ -3,15 +3,18 @@
   tasks:
     - name:
       apt:
-        name: ['python3-pip', 'python3-venv', 'docker.io', 'docker-compose']
+        name: ['git', 'python3-pip', 'python3-venv', 'docker.io', 'docker-compose']
         state: latest
       tags: installation, packages
 
     - name:
       pip:
         name:
-          - docker  
+          - docker
       tags: latest
+
+    - name: add permissions
+      shell: usermod -aG docker pi
 
     - name: Install Minikube
       shell:
@@ -19,3 +22,24 @@
           curl -Lo ~/minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-arm \
           && chmod +x ~/minikube && mkdir -p /usr/local/bin/ \
           && install ~/minikube /usr/local/bin/
+    
+    - name: verify assistant installed
+      stat:
+        path: /opt/home/assistant
+      register: assistant
+    
+    - name: pull latest assistant changes
+      git:
+        repo: https://github.com/teaglebuilt/homeassistant.git
+        dest: /opt/home/assistant
+        update: yes
+      when: assistant.stat.exists
+
+    - name: Install home assistant
+      ansible.builtin.git:
+        repo: https://github.com/teaglebuilt/homeassistant.git
+        dest: /opt/home/assistant
+        version: master
+      when: not assistant.stat.exists
+      
+    
