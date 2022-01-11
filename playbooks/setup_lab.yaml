@@ -1,0 +1,38 @@
+- hosts: workers
+  become: yes
+  tasks:
+    - name:
+      apt:
+        name: ['git', 'python3-pip', 'python3-venv', 'docker.io', 'docker-compose']
+        state: latest
+      tags: installation, packages
+
+    - name:
+      pip:
+        name:
+          - docker
+      tags: latest
+
+    - name: add permissions
+      shell: usermod -aG docker teaglebuilt
+    
+    - name: verify homelab installed
+      stat:
+        path: /opt/home
+      register: homelab
+    
+    - name: pull latest assistant changes
+      git:
+        repo: https://github.com/built-home/homelab.git
+        dest: /opt/home
+        update: yes
+      when: homelab.stat.exists
+
+    - name: Install homelab
+      ansible.builtin.git:
+        repo: https://github.com/built-home/homelab.git
+        dest: /opt/home
+        version: master
+      when: not homelab.stat.exists
+      
+    
