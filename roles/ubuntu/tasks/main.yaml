@@ -1,0 +1,13 @@
+---
+- include: vpn.yaml
+  tags: ["vpn"]
+# - include: host.yaml
+#   tags: ["host"]
+# - include: firmware.yaml
+#   tags: ["firmware"]
+# - include: packages.yaml
+#   tags: ["packages"]
+# - include: network.yaml
+#   tags: ["network"]
+# - include: vpn.yaml
+#   tags: ["vpn"]

@@ -1,0 +1,12 @@
+---
+- name: create user
+  user:
+    name: teaglebuilt
+    uid: 1001
+
+- name: sudo without password for user
+  copy:
+    content: 'teaglebuilt ALL=(ALL:ALL) NOPASSWD:ALL'
+    dest: /etc/sudoers.d/teaglebuilt_nopasswd
+    mode: 0440
+

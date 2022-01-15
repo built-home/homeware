@@ -1,0 +1,9 @@
+- name: reboot node
+  reboot:
+  listen: "reboot"
+
+- name: Restart strongswan
+  ansible.builtin.systemd:
+    name: strongswan-starter
+    state: restarted
+    daemon_reload: yes

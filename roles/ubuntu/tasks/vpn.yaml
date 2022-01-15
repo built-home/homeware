@@ -1,0 +1,71 @@
+---
+- name: Get DNS Nameservers
+  shell:
+    cmd: systemd-resolve --status | grep "DNS Servers" | awk '{print $3}'
+  register: nameserver
+
+- debug:
+    var: nameserver
+
+- name: backup IpSec configuration
+  ansible.builtin.copy:
+    src: /etc/ipsec.conf
+    dest: /etc/ipsec.conf.backup
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user_group }}"
+    mode: '0644'
+
+- name: backup IpSec secret
+  ansible.builtin.copy:
+    src: /etc/ipsec.secrets
+    dest: /etc/ipsec.secrets.backup
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user_group }}"
+    mode: '0644'
+
+- name: backup IpSec logging configuration
+  ansible.builtin.copy:
+    src: /etc/strongswan.d/charon-logging.conf
+    dest: /etc/strongswan.d/charon-logging.conf.backup
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user_group }}"
+    mode: '0644'
+
+- name: backup IpSec dhcp configuration
+  ansible.builtin.copy:
+    src: /etc/strongswan.d/charon/dhcp.conf
+    dest: /etc/strongswan.d/charon/dhcp.conf.backup
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user_group }}"
+    mode: '0644'
+
+- name: backup IpSec systemd configuration
+  ansible.builtin.copy:
+    src: /lib/systemd/system/strongswan.service
+    dest: /lib/systemd/system/strongswan.service.backup
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user_group }}"
+    mode: '0644'
+
+- name: "Add Strongswan config"
+  template:
+    dest: /etc/ipsec.conf
+    src: files/ipsec.conf.tpl
+    owner: root
+    mode: "0644"
+
+- name: "Add Strongswan secret"
+  template:
+    dest: /etc/ipsec.secrets
+    src: files/ipsec.secret.tpl
+    owner: root
+    mode: "0600"
+  notify:
+    - restart strongswan
+
+- name: "start strongswan"
+  systemd:
+    daemon_reload: true
+    name: strongswan-starter
+    enabled: true
+    state: start

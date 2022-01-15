@@ -1,0 +1,16 @@
+---
+- name: Setup k3s servers
+  tasks:
+  - name: Check if k3s is already installed
+    ansible.builtin.stat:
+      path: /usr/local/bin/k3s
+    register: k3s
+
+  - name: Install k3s on server
+    become: yes
+    hosts: rpi_master    
+    shell: curl -sfL https://get.k3s.io | sh -
+    environment:
+      K3S_NODE_NAME: "{{ inventory_hostname }}"
+      INSTALL_K3S_EXEC: "--disable servicelb --disable traefik"
+    when: not k3s.stat.exists

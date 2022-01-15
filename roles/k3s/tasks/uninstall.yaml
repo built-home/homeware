@@ -1,0 +1,11 @@
+---
+- name: Uninstall k3s servers
+  tasks:
+  - name: Check if script for uninstalling k3s server is present
+    stat: 
+      path: /usr/local/bin/k3s-uninstall.sh
+    register: k3s_present
+
+  - name: Uninstall k3s from server
+    shell: /usr/local/bin/k3s-uninstall.sh
+    when: k3s_present.stat.exists

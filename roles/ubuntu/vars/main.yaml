@@ -1,0 +1,21 @@
+---
+packages:
+  apt_install:
+    - unattended-upgrades
+    - netplan.io
+    - dnsmasq
+    - strongswan
+    - strongswan-pki 
+    - libcharon-extra-plugins 
+    - libcharon-extauth-plugins 
+    - libstrongswan-extra-plugins
+    - python3
+    - python3-pip
+    - lm-sensors
+    - controlfan
+    - snap
+
+loadbalancer: ${METALLB}
+domain: ${LOCAL_DOMAIN}
+ansible_user: ${ANSIBLE_USER}
+ansible_user_group: ${ANSIBLE_USER_GROUP}
