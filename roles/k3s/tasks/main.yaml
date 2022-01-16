@@ -1,5 +1,4 @@
 ---
-- include: uninstall.yaml
-  tags: ["uninstall"]
-- include: install.yaml
-  tags: ["install"]
+- import_tasks: install.yaml
+  tags:
+    - install

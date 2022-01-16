@@ -1,4 +1,14 @@
 ---
+- name: Upgrade system
+  apt:
+    upgrade: dist
+    # Need the force_apt_get until
+    # https://github.com/ansible/ansible/issues/56832
+    force_apt_get: true
+  register: apt_upgrade
+  retries: 5
+  until: apt_upgrade is success
+
 - name: packages | upgrade all packages
   ansible.builtin.apt:
     upgrade: full

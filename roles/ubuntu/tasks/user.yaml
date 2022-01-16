@@ -1,5 +1,8 @@
 ---
 - name: create user
+  remote_user: ubuntu
+  vars:
+    ansible_become_pass: "Cosimoto101!"
   user:
     name: teaglebuilt
     uid: 1001

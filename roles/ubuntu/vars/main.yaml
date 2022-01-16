@@ -1,19 +1,19 @@
 ---
 packages:
   apt_install:
+    - apt-transport-https
+    - ca-certificates
     - unattended-upgrades
-    - netplan.io
-    - dnsmasq
-    - strongswan
-    - strongswan-pki 
-    - libcharon-extra-plugins 
-    - libcharon-extauth-plugins 
-    - libstrongswan-extra-plugins
+    - software-properties-common
+    - curl
+    - dnsutils
+    - git
     - python3
     - python3-pip
     - lm-sensors
-    - controlfan
     - snap
+    - htop
+    - rsync
 
 loadbalancer: ${METALLB}
 domain: ${LOCAL_DOMAIN}
