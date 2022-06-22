@@ -1,0 +1,21 @@
+---
+packages:
+  apt_install:
+    - apt-transport-https
+    - ca-certificates
+    - unattended-upgrades
+    - software-properties-common
+    - curl
+    - dnsutils
+    - git
+    - python3
+    - python3-pip
+    - lm-sensors
+    - snap
+    - htop
+    - rsync
+
+loadbalancer: ${METALLB}
+domain: ${LOCAL_DOMAIN}
+ansible_user: ${ANSIBLE_USER}
+ansible_user_group: ${ANSIBLE_USER_GROUP}

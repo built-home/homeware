@@ -1,0 +1,31 @@
+---
+- name: Check if cluster is installed
+  ansible.builtin.stat:
+    path: /etc/rancher/k3s/config.yaml
+  register: k3s_check_installed
+  check_mode: false
+
+- name: Uninstall k3s
+  shell: /usr/local/bin/k3s-uninstall.sh
+  when: k3s_check_installed.stat.exists
+  
+- name: Install k3s on master  
+  shell: curl -sfL https://get.k3s.io | sh -
+  environment:
+    K3S_NODE_NAME: "{{ inventory_hostname }}"
+    INSTALL_K3S_EXEC: "--disable servicelb --disable traefik"
+  when: inventory_hostname in ['kmaster01']
+
+- name: Get master token
+  become: true
+  shell: sudo cat /var/lib/rancher/k3s/server/node-token
+  register: token
+  when: inventory_hostname in ['kmaster01']
+
+- name: Install k3s on workers
+  become: true   
+  shell: curl -sfL https://get.k3s.io | K3S_URL=https://{{ k3s_master }}:6443 K3S_TOKEN={{ token }} sh -
+  environment:
+    K3S_NODE_NAME: "{{ inventory_hostname }}"
+    INSTALL_K3S_EXEC: "--disable servicelb --disable traefik"
+  when: inventory_hostname in ['kworker01', 'kworker02']

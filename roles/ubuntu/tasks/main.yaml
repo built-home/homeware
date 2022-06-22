@@ -1,0 +1,7 @@
+---
+- include: network.yaml
+  tags: ["network"]
+- include: time.yaml
+  tags: ["timezone"]
+- include: packages.yaml
+  tags: ["packages"]

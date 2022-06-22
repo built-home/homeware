@@ -1,0 +1,122 @@
+---
+- name: Get NVMe Devices list
+  shell: "{{ 'cd /dev && ls -p nvme[0-9]' }}"
+  register: nvme
+- debug: var=nvme.stdout_lines
+
+- name: Compare Master NVMe output with New output
+  fail:
+    msg: Number of devices present does not match the master list
+  when: nvme_list.stdout_lines != nvme.stdout_lines
+
+- name: NVMe Hardware List Data
+  #shell: lspci | grep -i "non-volatile" | awk '{print $1}'
+  shell: '/usr/bin/lspci -vvv | grep -iA30 samsung | grep -i "Non-Volatile\|LnkSta"'
+  register: result
+
+- debug: var=result.stdout_lines
+    #loop: "{{ range(0, 2)|list}}"
+- name: Append Lspci results to output file
+  lineinfile:
+    dest: ./lspci.txt
+    line: "{{ line_item }}"
+    insertafter: EOF 
+  with_items:
+    - "{{ result.stdout }}"
+    - "--------------------------------------------------------------------------"
+  delegate_to: localhost
+  loop_control:
+    loop_var: line_item
+
+- name: NVMe lsblk Data
+    #shell: lspci | grep -i "non-volatile" | awk '{print $1}'
+    #shell: "{{ '/usr/sbin/lspci | grep -i Non-Volatile' }}"
+  shell: "{{ 'lsblk' }}"
+  register: result
+
+- debug: var=result.stdout_lines
+    #loop: "{{ range(0, 2)|list}}"
+- name: Append Lsblk results to output file
+  lineinfile:
+    dest: ./lsblk.txt
+    line: "{{ line_item }}"
+    insertafter: EOF
+  with_items:
+    - "{{ result.stdout }}"
+    - "----------------------------------------------------------------------------"
+  delegate_to: localhost
+  loop_control:
+    loop_var: line_item
+
+
+- name: NVMe Smart Data
+    #shell: lspci | grep -i "non-volatile" | awk '{print $1}'
+  shell: "/usr/sbin/nvme smart-log /dev/{{nvme_item}}"
+  #shell: "{{ 'lsblk' }}"
+  #become_user: root
+  with_items: "{{ nvme.stdout_lines | select('match','nvme[0-9]$') | list }}"
+  loop_control:
+    loop_var: nvme_item
+  register: device_smart
+- set_fact:
+   number_of_devices: "{{ nvme.stdout_lines | length }}"
+- debug: var=number_of_devices
+
+
+- debug: var=device_smart.results.{{device_number}}.stdout_lines
+  loop: "{{ range(0, number_of_devices | int)|list }}"
+  #with_sequence: start=0 end= "{{ number_of_devices|int }}"
+  loop_control:
+    loop_var: device_number
+  register: device_smart_data
+- debug: var=device_smart_data
+  #- set_fact:
+  # dataresult:  "{{ device_smart_data | from_json }}"
+    #loop: "{{ range(0, 2)|list}}"
+
+- name: Append Smart results to output file
+  #include_tasks: Tasks.yml
+  lineinfile:
+    dest: ./smart.txt
+    line: "{{ line_item | to_nice_json }}"
+    insertafter: EOF
+    #loop: "{{ device_smart.results |  | map(attribute='stdout_lines') | join('\n') }}"
+  with_items:
+    - "{{ device_smart_data.results }}"
+    - "-----------------------------------------------------------------------------"
+  delegate_to: localhost
+  loop_control:
+    loop_var: line_item
+
+- name: NVMe Extended Smart Data
+  shell: "nvme get-log {{nvme_namespace_id}} -i 0xc0 -l 512 -n 1"
+  ignore_errors: True
+  with_items:
+    - "{{ namespace.stdout_lines }}"
+  loop_control:
+    loop_var: nvme_namespace_id
+  register: device_extended_smart
+- debug: var=device_extended_smart.results.{{device_number}}.stdout_lines
+  loop: "{{ range(0, number_of_devices | int)|list }}"
+  loop_control:
+    loop_var: device_number
+  register: device_extended_smart_data
+- debug: var=device_extended_smart_data
+
+- name: Append Extended Smart results to output file
+  lineinfile:
+    dest: ./extended.txt
+    line: "{{ line_item | to_nice_json }}"
+    insertafter: EOF
+  with_items:
+    - "{{ device_extended_smart_data.results }}"
+    - "-----------------------------------------------------"
+  delegate_to: localhost
+  loop_control:
+    loop_var: line_item
+
+
+- name: Run FIO for 30 sec on all NVMe Drives
+  shell: "{{ 'fio fio_por.fio --output-format=json --output=por.json' }}"
+  register: fio_run
+- debug: var=fio_run
