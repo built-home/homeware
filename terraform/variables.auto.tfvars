@@ -1,0 +1,7 @@
+proxmox_api_url = "${PROXMOX_ADDRESS}"
+proxmox_api_key = "${PROXMOX_TOKEN_ID}"
+proxmox_api_secret = "${PROXMOX_SECRET}"
+proxmox_node = "${PROXMOX_NODE}"
+network_bridge = "vmbr0"
+net_gateway = "${GATEWAY}"
+fileserver_ip_address  = "${NFS_IP}"
